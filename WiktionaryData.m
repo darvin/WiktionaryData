@@ -30,18 +30,17 @@ Begin["`Private`"]
 
 
 << MongoDBLink`
-wikiDumpGetCollection[] := Module[{conn, db},
-  conn = OpenConnection[];
-  db = GetDatabase[conn, "wikiDump"];
-  {conn, GetCollection[db, "wikiDump"]}
-];
+
 
 wikiDumpFetchPage[request_] :=
-    Module[{page, collection, connection}, {connection, collection} =
-        wikiDumpGetCollection[];
-    pages =
-        FindDocuments[collection, request];
-    CloseConnection[connection];
+    Module[{page, collection, connection, db},
+      connection = OpenConnection[];
+      db = GetDatabase[connection, "wikiDump"];
+      Print[db];
+    collection = GetCollection[db, "wikiDump"];
+      Print[collection];
+    pages = FindDocuments[collection, request];
+      Print[pages];
     First[pages]
     ];
 
