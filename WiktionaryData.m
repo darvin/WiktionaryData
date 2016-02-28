@@ -31,16 +31,13 @@ Begin["`Private`"]
 
 << MongoDBLink`
 
+connection = OpenConnection[];
 
 wikiDumpFetchPage[request_] :=
-    Module[{page, collection, connection, db},
-      connection = OpenConnection[];
+    Module[{page, collection, db},
       db = GetDatabase[connection, "wikiDump"];
-      Print[db];
     collection = GetCollection[db, "wikiDump"];
-      Print[collection];
     pages = FindDocuments[collection, request];
-      Print[pages];
     First[pages]
     ];
 
