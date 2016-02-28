@@ -1,0 +1,3 @@
+
+
+wikiDumpFetchPage["my"]
