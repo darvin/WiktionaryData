@@ -1,6 +1,7 @@
-<<<<<<< HEAD
 .idea
-=======
+
+*.iml
+
 # Xcode
 #
 # gitignore contributors: remember to update Global/Xcode.gitignore, Objective-C.gitignore & Swift.gitignore
@@ -54,4 +55,3 @@ Carthage/Build
 
 fastlane/report.xml
 fastlane/screenshots
->>>>>>> 34b073b521e2107c587f6e78e3d610d61e65ab75
