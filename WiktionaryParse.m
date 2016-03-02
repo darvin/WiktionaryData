@@ -14,7 +14,10 @@
 
 BeginPackage["WiktionaryData`WiktionaryParse`"]
 (* Exported symbols added here with SymbolName::usage *)
-ClearAll[WiktionaryParse, WkArticle, WkFrmt, WkTag, WkTemplate, WkText, WkSection, WkIntlink, WkExtlink];
+ClearAll[WiktionaryParse,
+  WkArticle, WkFrmt, WkTag, WkTemplate, WkText, WkSection, WkIntlink, WkExtlink,
+  WiktionaryParseToMarkdown
+];
 
 WiktionaryParse::usage = "Parses";
 
@@ -27,12 +30,16 @@ WkSection::usage = "Node that represents section";
 WkIntlink::usage = "Node that represents internal link";
 WkExtlink::usage = "Node that represents external link";
 
+
+WiktionaryParseToMarkdown::usage = "Converts to markdown";
+
 Begin["`Private`"]
 
 
 
 WiktionaryParse[xml_?(MatchQ[#,XMLObject["Document"][___]] &)]:=Module[{},
-  Block[{XMLObject, XMLElement}, XMLObject["Document"] = #2 &;
+  Block[{XMLObject, XMLElement},
+    XMLObject["Document"] = #2 &;
 
   XMLElement["org.sweble.wikitext.engine.nodes.EngPage", attr_,
     data_] := WkArticle[data];
@@ -46,7 +53,7 @@ WiktionaryParse[xml_?(MatchQ[#,XMLObject["Document"][___]] &)]:=Module[{},
     ___,
     XMLElement["body", __, data_],
     ___}] :=
-      WkSection[{"Level" -> level,
+      WkSection[{"Level" -> ToExpression[level],
         "Title" -> heading}, {Sequence @@ data}];
 
 
@@ -97,10 +104,11 @@ WiktionaryParse[xml_?(MatchQ[#,XMLObject["Document"][___]] &)]:=Module[{},
     XMLElement["body", __, {XMLElement["content", __, data_]}]}] :=
       WkTag[elemName, body];
 
-  XMLElement["rtd", attr_, data_] := ## &[];
+    XMLElement["rtd", attr_, data_] := ## &[];
+    XMLElement["hr", attr_, data_] := ## &[];
   XMLElement["eref", attr_, data_] := ## &[]; (*fixme*)
 
-  XMLElement["hr", attr_, data_] := ## &[];
+    XMLElement["image", attr_, data_] := ## &[]; (*fixme*)
   XMLElement["precededByNewline", attr_, data_] := ## &[];
   XMLElement[elem_, {"ptk:location" -> __}, data_] :=
       XMLElement[elem, {}, data];
@@ -109,6 +117,29 @@ WiktionaryParse[xml_?(MatchQ[#,XMLObject["Document"][___]] &)]:=Module[{},
   ];
   res
 ];
+
+
+
+WiktionaryParseToMarkdown[article_] :=
+    Module[{},
+      Block[{WkArticle, WkFrmt, WkTag, WkTemplate, WkText, WkSection,
+        WkIntlink, WkExtlink},
+        WkArticle[children_] := StringJoin[children] <> "\n";
+
+        WkSection[{"Level" -> level_, "Title" -> heading_}, children_] :=
+            StringJoin[PadLeft[{}, level, "#"]] <> " " <> heading <> "\n" <>
+                children;
+        WkText[text_] := text;
+        WkTemplate[name_, args_] :=
+            "`" <> name <> "|" <> ToString[args] <> "`";
+        WkIntlink[link_] := "[" <> link <> "]";
+        WkFrmt[elem_, children_] := StringJoin[children] <> "\n\n";
+        WkFrmt["li", children_] := " - " <> StringJoin[children] <> "\n";
+        WkTag["hiero", text] := "`hiero:" <> text <> "`";
+        res = article;
+      ];
+      res
+    ];
 
 End[] (* `Private` *)
 
